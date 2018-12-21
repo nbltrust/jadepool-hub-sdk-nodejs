@@ -3,6 +3,8 @@ const sha256 = require('js-sha256')
 const secp256k1 = require('secp256k1')
 const axios = require('axios')
 const crypto = require('@jadepool/crypto')
+const isHex = require('is-hex')
+const isBase64 = require('is-base64')
 const version = 1
 const algorithmId = 33
 
@@ -16,12 +18,31 @@ class Api {
    * @param config
    */
   constructor(config) {
-    if(_.isNil(config) || _.isNil(config.eccKey) || _.isNil(config.httpEndpoint) || _.isNil(config.appId)) {
+    const authKeyExist = !_.isNil(config.authKey)
+    const authKeyEncoderExist = !_.isNil(config.authKeyEncoder)
+    if(_.isNil(config) ||
+      _.isNil(config.eccKey) ||
+      _.isNil(config.httpEndpoint) ||
+      _.isNil(config.appId) ||
+      _.isNil(config.eccKeyEncoder) ||
+      (authKeyExist && !authKeyEncoderExist)) {
       throw new Error('initialization failed, missing parameter...')
     }
+    const encoder = ['hex', 'base64']
+    if (!encoder.includes(config.eccKeyEncoder) || (authKeyExist && !encoder.includes(config.authKeyEncoder))){
+      throw new Error('Only hex and base64 encoding schemes are supported...')
+    }
+    const isEccKeyValid = config.eccKeyEncoder === 'hex' ? isHex(config.eccKey) : isBase64(config.eccKey)
+    const isAuthKeyValid = authKeyExist ? (config.authKeyEncoder === 'hex' ? isHex(config.authKey) : isBase64(config.authKey)): true
+    if (!isEccKeyValid || !isAuthKeyValid) {
+      throw new Error('Invalid key format...')
+    }
+
     this.appId = config.appId
     this.eccKey = config.eccKey
+    this.eccKeyEncoder = config.eccKeyEncoder
     this.authKey = config.authKey
+    this.authKeyEncoder = config.authKeyEncoder
     this.httpEndpoint = config.httpEndpoint
   }
 
@@ -66,8 +87,8 @@ class Api {
       const big = ~~(sequence / 0x0100000000)
       const low = (sequence % 0x0100000000)
       let sequenceBuffer = new Buffer(8)
-      sequenceBuffer.writeUInt32BE(big, 0)
-      sequenceBuffer.writeUInt32BE(low, 4)
+      sequenceBuffer.writeUInt32LE(low, 0)
+      sequenceBuffer.writeUInt32LE(big, 4)
 
       bufferArr.push(versionBuffer)
       bufferArr.push(algorithmIdBuffer)
@@ -98,7 +119,7 @@ class Api {
 
       let bufferConcatSha256 = sha256(bufferConcat)
 
-      const sigObj = secp256k1.sign(Buffer.from(bufferConcatSha256, 'hex'), Buffer.from(this.authKey, 'hex'))
+      const sigObj = secp256k1.sign(Buffer.from(bufferConcatSha256, 'hex'), Buffer.from(this.authKey, this.authKeyEncoder))
 
       let signatureBuffer = sigObj.signature
       let signatureLengthBuffer = new Buffer(2)
@@ -108,7 +129,7 @@ class Api {
       let withdrawAuth = resultBuffer.toString('hex')
       obj.auth = withdrawAuth
     }
-    const sig = crypto.ecc.sign(obj, Buffer.from(this.eccKey, 'hex'), {})
+    const sig = crypto.ecc.sign(obj, Buffer.from(this.eccKey, this.eccKeyEncoder), {})
     let params = {
       timestamp: sig.timestamp,
       data: obj,
@@ -132,7 +153,7 @@ class Api {
     const obj = {
       type: coinType
     }
-    const sig = crypto.ecc.sign(obj, Buffer.from(this.eccKey, 'hex'), {})
+    const sig = crypto.ecc.sign(obj, Buffer.from(this.eccKey, this.eccKeyEncoder), {})
     let params = {
       timestamp: sig.timestamp,
       data: obj,
@@ -157,7 +178,7 @@ class Api {
     const obj = {
       type: coinType
     }
-    const sig = crypto.ecc.sign(obj, Buffer.from(this.eccKey, 'hex'), {})
+    const sig = crypto.ecc.sign(obj, Buffer.from(this.eccKey, this.eccKeyEncoder), {})
     let params = {
       timestamp: sig.timestamp,
       data: obj,
@@ -183,7 +204,7 @@ class Api {
       type: coinType,
       audittime: auditTime
     }
-    const sig = crypto.ecc.sign(obj, Buffer.from(this.eccKey, 'hex'), {})
+    const sig = crypto.ecc.sign(obj, Buffer.from(this.eccKey, this.eccKeyEncoder), {})
     let params = {
       timestamp: sig.timestamp,
       data: obj,
@@ -204,7 +225,7 @@ class Api {
     if(_.isNil(orderId) || typeof orderId !== 'string') {
       throw new Error('missing required parameter or parameter type mismatch...')
     }
-    const sig = crypto.ecc.sign({}, Buffer.from(this.eccKey, 'hex'), {})
+    const sig = crypto.ecc.sign({}, Buffer.from(this.eccKey, this.eccKeyEncoder), {})
     let response = await get(this.httpEndpoint + `/api/v1/transactions/${orderId}?crypto=ecc&appid=${this.appId}&timestamp=${sig.timestamp}&sig=${encodeURIComponent(sig.signature)}`)
     return response.result
   }
@@ -218,7 +239,7 @@ class Api {
     if(_.isNil(auditId) || typeof auditId !== 'string') {
       throw new Error('missing required parameter or parameter type mismatch...')
     }
-    const sig = crypto.ecc.sign({}, Buffer.from(this.eccKey, 'hex'), {})
+    const sig = crypto.ecc.sign({}, Buffer.from(this.eccKey, this.eccKeyEncoder), {})
     let response = await get(this.httpEndpoint + `/api/v1/audits/${auditId}?crypto=ecc&appid=${this.appId}&timestamp=${sig.timestamp}&sig=${encodeURIComponent(sig.signature)}`)
     return response.result
   }
@@ -232,7 +253,7 @@ class Api {
     if(_.isNil(coinType) || typeof coinType !== 'string') {
       throw new Error('missing required parameter or parameter type mismatch...')
     }
-    const sig = crypto.ecc.sign({}, Buffer.from(this.eccKey, 'hex'), {})
+    const sig = crypto.ecc.sign({}, Buffer.from(this.eccKey, this.eccKeyEncoder), {})
     let response = await get(this.httpEndpoint + `/api/v1/wallet/${coinType}/status?crypto=ecc&appid=${this.appId}&timestamp=${sig.timestamp}&sig=${encodeURIComponent(sig.signature)}`)
     let result = response.result
     return {'balance': result.balance,'balanceAvailable': result.balanceAvailable,'balanceUnavailable': result.balanceUnavailable}
@@ -305,7 +326,7 @@ class Api {
       let obj = {
         authToken: auth
       }
-      const sig = crypto.ecc.sign(obj, Buffer.from(this.eccKey, 'hex'), {})
+      const sig = crypto.ecc.sign(obj, Buffer.from(this.eccKey, this.eccKeyEncoder), {})
       let params = {
         timestamp: sig.timestamp,
         data: obj,
