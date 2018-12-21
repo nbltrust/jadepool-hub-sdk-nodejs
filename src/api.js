@@ -316,7 +316,7 @@ class Api {
 
       let bufferConcat = Buffer.concat(bufferArr)
       let bufferConcatSha256 = sha256(bufferConcat)
-      const sigObj = secp256k1.sign(Buffer.from(bufferConcatSha256, 'hex'), Buffer.from('ad70927341c3ccd4c745e51db0c00ce23edc667cfc71e990a584e9e951c39297', 'hex'))
+      const sigObj = secp256k1.sign(Buffer.from(bufferConcatSha256, 'hex'), Buffer.from(this.authKey, this.authKeyEncoder))
       let signatureBuffer = sigObj.signature
       let signatureLengthBuffer = new Buffer(2)
       signatureLengthBuffer.writeInt16LE(signatureBuffer.length)
