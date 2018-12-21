@@ -15,7 +15,9 @@ $ npm install @jadepool/sdk
 
   const config = {
     eccKey: 'ad70927341c3ccd4c745e51db0c00ce23edc667cfc71e990a584e9e951c39297', // ecc private key for signing request to Jadepool
-    authKey: 'ad70927341c3ccd4c745e51db0c00ce23edc667cfc71e990a584e9e951c39297', // private key for authorizing coin and withdrawal
+    eccKeyEncoder: 'hex', // ecc private key encoding scheme
+    authKey: 'rXCSc0HDzNTHReUdsMAM4j7cZnz8cemQpYTp6VHDkpc=', // private key for authorizing coin and withdrawal
+    authKeyEncoder: 'base64', //  authKey encoding scheme
     httpEndpoint: 'http://localhost:7001', // Jadepool url
     appId: 'test' // app id for ecc key (set on Jadepool Admin)
   }
