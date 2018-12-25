@@ -32,7 +32,7 @@ const test = async () => {
   let balance = await api.getBalance('BTC')
   console.log(JSON.stringify(balance))
 
-  let authToken = await api.authCoin('BTC', 'BTC', 'BTC', 'BTC', undefined, '8')
+  let authToken = await api.authCoin('BTC', 'BTC', 'BTC', 'BTC', 8)
   console.log(authToken)
 }
 
