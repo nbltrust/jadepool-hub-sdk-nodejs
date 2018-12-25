@@ -1,10 +1,10 @@
 {
   "name": "@jadepool/sdk",
-  "version": "0.12.4",
+  "version": "0.12.5",
   "description": "Jadepool nodejs SDK",
   "main": "src/index.js",
   "scripts": {
-    "start": "NODE_ENV=env node ./index.js"
+    "test": "mocha test/**/*.test.js"
   },
   "engines": {
     "node": ">=8.13.0"
@@ -24,5 +24,15 @@
     "js-sha256": "^0.9.0",
     "lodash": "^4.17.11",
     "secp256k1": "^3.5.2"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "eslint": "^5.11.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^8.0.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
+    "mocha": "^5.2.0"
   }
 }
