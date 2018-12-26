@@ -7,7 +7,7 @@ describe('AuthBuilder', function () {
   it('will build withdraw auth', function () {
     const authStr = authBuilder.buildWithdraw(privKey, {
       sequence: 8888,
-      coinType: 'BTC',
+      coinId: 'BTC',
       to: 'mg2bfYdfii2GG13HK94jXBYPPCSWRmSiAS',
       value: '0.01',
       memo: null

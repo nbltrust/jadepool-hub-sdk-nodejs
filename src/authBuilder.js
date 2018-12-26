@@ -9,7 +9,7 @@ const algorithmId = 33
  * @param {Buffer} priKey
  * @param {object} opts
  * @param {number} opts.sequence
- * @param {string} opts.coinType
+ * @param {string} opts.coinId
  * @param {string} opts.to
  * @param {string} opts.value
  * @param {string} [opts.memo=undefined]
@@ -19,10 +19,10 @@ function buildWithdraw (priKey, opts = {}) {
     throw new Error('missing private key...')
   }
   let arr = [
-    { val: opts.coinType, required: true },
-    { val: opts.to, required: true },
-    { val: opts.value, required: true },
-    { val: opts.memo, required: false }
+    { val: opts.coinId, required: true, type: 'string' },
+    { val: opts.to, required: true, type: 'string' },
+    { val: opts.value, required: true, type: 'string' },
+    { val: opts.memo, required: false, type: 'string' }
   ]
 
   let bufferArr = []
@@ -52,7 +52,7 @@ function buildWithdraw (priKey, opts = {}) {
     if (arg.required === true && _.isNil(arg.val)) {
       throw new Error('missing required parameter...')
     }
-    if (!_.isNil(arg.val) && typeof arg.val !== 'string') {
+    if (!_.isNil(arg.val) && typeof arg.val !== arg.type) {
       throw new Error('parameter type mismatch...')
     }
     let argBuffer
@@ -97,12 +97,12 @@ function buildCoin (priKey, opts = {}) {
     throw new Error('missing private key...')
   }
   let arr = [
-    { val: opts.coinId, required: true },
-    { val: opts.coinType, required: true },
-    { val: opts.chain, required: true },
-    { val: opts.token, required: true },
-    { val: opts.contract, required: false },
-    { val: opts.decimal.toString(), required: true }
+    { val: opts.coinId, required: true, type: 'string' },
+    { val: opts.coinType, required: true, type: 'string' },
+    { val: opts.chain, required: true, type: 'string' },
+    { val: opts.token, required: true, type: 'string' },
+    { val: opts.contract, required: false, type: 'string' },
+    { val: opts.decimal, required: true, type: 'number' }
   ]
 
   let bufferArr = []
@@ -121,7 +121,7 @@ function buildCoin (priKey, opts = {}) {
     if (arg.required === true && _.isNil(arg.val)) {
       throw new Error('missing required parameter...')
     }
-    if (!_.isNil(arg.val) && typeof arg.val !== 'string') {
+    if (!_.isNil(arg.val) && typeof arg.val !== arg.type) {
       throw new Error('parameter type mismatch...')
     }
     let argBuffer
@@ -130,7 +130,7 @@ function buildCoin (priKey, opts = {}) {
       argLengthBuffer.writeInt16LE(0)
       bufferArr.push(argLengthBuffer)
     } else {
-      argBuffer = Buffer.from(arg.val, 'ascii')
+      argBuffer = Buffer.from(arg.val.toString(), 'ascii')
       argLengthBuffer.writeInt16LE(argBuffer.length)
       bufferArr.push(argLengthBuffer)
       bufferArr.push(argBuffer)

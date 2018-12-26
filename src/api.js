@@ -61,17 +61,17 @@ class Api {
    * @param extraData：提现备注，暂时没有用到，可选填
    * @returns Object：瑶池生成的提现订单
    */
-  async withdraw (sequence, coinType, value, to, memo = undefined, extraData = undefined) {
+  async withdraw (sequence, coinId, value, to, memo = undefined, extraData = undefined) {
     let obj = {
       sequence: sequence,
-      type: coinType,
+      type: coinId,
       value: value,
       to: to,
       memo: memo,
       extraData: extraData
     }
     if (!_.isNil(this.authKey)) {
-      obj.auth = authBuilder.buildWithdraw(this.authKey, { sequence, coinType, value, to, memo })
+      obj.auth = authBuilder.buildWithdraw(this.authKey, { sequence, coinId, value, to, memo })
     }
     const sig = crypto.ecc.sign(obj, this.eccKey, {})
     let params = {
