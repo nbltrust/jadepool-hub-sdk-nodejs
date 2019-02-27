@@ -65,8 +65,6 @@ class Api {
 
   /**
    * 生成新充值地址
-   * @param coinId 充值地址币种类型
-   * @returns String 地址
    */
   async newAddress (coinId) {
     if (!_.isString(coinId)) {
@@ -80,9 +78,6 @@ class Api {
 
   /**
    * 验证地址有效性
-   * @param coinId 地址币种类型
-   * @param address 地址
-   * @returns Boolean
    */
   async verifyAddress (coinId, address) {
     if (!(_.isString(coinId) && _.isString(address))) {
@@ -96,9 +91,6 @@ class Api {
 
   /**
    * 发起审计
-   * @param coinId 审计币种类型
-   * @param auditTime 审计时间
-   * @returns Object 瑶池生成的审计订单
    */
   async audit (coinId, auditTime) {
     if (!(_.isString(coinId) && _.isNumber(auditTime))) {
@@ -113,8 +105,6 @@ class Api {
 
   /**
    * 查询瑶池订单详情
-   * @param orderId：订单ID
-   * @returns Object: 订单详情
    */
   async getOrder (orderId) {
     if (!(_.isString(orderId) || _.isNumber(orderId))) {
@@ -126,8 +116,6 @@ class Api {
 
   /**
    * 查询审计订单详情
-   * @param auditId：审计订单ID
-   * @returns Object: 审计订单详情
    */
   async getAudit (auditId) {
     if (!_.isString(auditId)) {
@@ -139,8 +127,6 @@ class Api {
 
   /**
    * 查询余额
-   * @param coinType：币种
-   * @returns {Object: {balance: 总余额, balanceAvailable: 可用余额, balanceUnavailable: 不可用余额}}
    */
   async getBalance (coinId) {
     if (!_.isString(coinId)) {
@@ -157,7 +143,6 @@ class Api {
 
   /**
    * 授权币种
-   * @returns {string} authToken
    */
   async authCoin (coinId, coinType, chain, token, decimal, contract = undefined) {
     if (_.isNil(this.authKey)) {

@@ -22,7 +22,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@jadepool/crypto": "^0.1.2",
     "argparse": "^1.0.10",
