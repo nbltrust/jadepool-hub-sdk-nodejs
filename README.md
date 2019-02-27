@@ -5,7 +5,23 @@
 Using npm:
 
 ```bash
-$ npm install @jadepool/sdk
+npm install @jadepool/sdk
+```
+
+## Use cli
+
+```bash
+# show help of cli, all commands can be seen
+bin/cli -h
+
+# create new keypairs
+bin/cli.js keypairs
+
+# create new address
+bin/cli.js address-new coinId
+
+# withdraw
+bin/cli.js withdraw coinId to value sequence [-m MEMO] [-d EXTRADATA]
 ```
 
 ## Example
@@ -34,7 +50,12 @@ $ npm install @jadepool/sdk
   // true/false
 
   // request a withdrawal
-  let withdrawOrder = await api.withdraw(3, 'BTC', '0.1', 'mg2bfYdfii2GG13HK94jXBYPPCSWRmSiAS')
+  let withdrawOrder = await api.withdraw({
+    coinId: 'BTC',
+    to: 'mg2bfYdfii2GG13HK94jXBYPPCSWRmSiAS',
+    value: '0.1',
+    sequence: 0
+  })
   // sample result
   // {
   //   "data":{},
@@ -203,9 +224,7 @@ $ npm install @jadepool/sdk
   // authorize coin
   let authToken = await api.authCoin('BTC', 'BTC', 'BTC', 'BTC', 8)
   // sample result
-  // {
-  //   "AuthToken":"010021030042544303004254430300425443030042544300000100384000379e63b6ead7243ec5dd34b0a620a1ca5ae8c9f9ada690b5af17a9e46e75522e24babd84acd585f16d512c55846e45507293886aa9645409dfa35fc1dfe601df"
-  // }
+  // true
 
 ```
 
