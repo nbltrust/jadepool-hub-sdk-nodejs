@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const axios = require('axios')
+const axios = require('axios').default
 const crypto = require('@jadepool/crypto')
 const isHex = require('is-hex')
 const isBase64 = require('is-base64')
@@ -8,11 +8,6 @@ const authBuilder = require('./authBuilder')
 class Api {
   /**
    * 初始化
-   * eccKey：和瑶池通信ECC私钥
-   * authKey：为密码机验签的交易签名私钥，选填
-   * httpEndpoint：瑶池URL
-   * appId：ECC私钥对应的appId(admin上设置)
-   * @param config
    */
   constructor (config) {
     const authKeyExist = !_.isNil(config.authKey)
@@ -37,10 +32,11 @@ class Api {
 
     this.appId = config.appId
     this.httpEndpoint = config.httpEndpoint
-    Object.defineProperties(this, {
-      '_eccKey': { value: Buffer.from(config.eccKey, config.eccKeyEncoder) },
-      '_authKey': { value: Buffer.from(config.authKey, config.authKeyEncoder) }
-    })
+    // 定义Buffer
+    Object.defineProperty(this, '_eccKey', { value: Buffer.from(config.eccKey, config.eccKeyEncoder) })
+    if (authKeyExist) {
+      Object.defineProperty(this, '_authKey', { value: Buffer.from(config.authKey, config.authKeyEncoder) })
+    }
   }
   /**
    * @returns {Buffer}
@@ -53,110 +49,65 @@ class Api {
 
   /**
    * 发起提现
-   * @param sequence：提现唯一序列号
-   * @param coinType：币种
-   * @param value：金额
-   * @param to：目标地址
-   * @param memo：交易备注（EOS或CYB使用），可选填
-   * @param extraData：提现备注，暂时没有用到，可选填
-   * @returns Object：瑶池生成的提现订单
    */
-  async withdraw (sequence, coinId, value, to, memo = undefined, extraData = undefined) {
-    let obj = {
-      sequence: sequence,
-      type: coinId,
-      value: value,
-      to: to,
-      memo: memo,
-      extraData: extraData
-    }
+  async withdraw ({ coinId, value, to, sequence, memo, extraData }) {
+    let obj = { type: coinId, value, to }
+    if (_.isNumber(sequence)) obj.sequence = sequence
+    if (_.isString(memo)) obj.memo = memo
+    if (_.isString(extraData)) obj.extraData = extraData
+    // HSM mode required
     if (!_.isNil(this.authKey)) {
       obj.auth = authBuilder.buildWithdraw(this.authKey, { sequence, coinId, value, to, memo })
     }
-    const sig = crypto.ecc.sign(obj, this.eccKey, {})
-    let params = {
-      timestamp: sig.timestamp,
-      data: obj,
-      sig: sig.signature,
-      appid: this.appId,
-      crypto: 'ecc'
-    }
-    let response = await post(this.httpEndpoint + '/api/v1/transactions', params)
+    let response = await this._post('/api/v1/transactions', obj)
     return response.result
   }
 
   /**
    * 生成新充值地址
-   * @param coinType：充值地址币种类型
-   * @returns String: 地址
+   * @param coinId 充值地址币种类型
+   * @returns String 地址
    */
-  async newAddress (coinType) {
-    if (_.isNil(coinType) || typeof coinType !== 'string') {
+  async newAddress (coinId) {
+    if (!_.isString(coinId)) {
       throw new Error('missing required parameter or parameter type mismatch...')
     }
-    const obj = {
-      type: coinType
-    }
-    const sig = crypto.ecc.sign(obj, this.eccKey, {})
-    let params = {
-      timestamp: sig.timestamp,
-      data: obj,
-      sig: sig.signature,
-      appid: this.appId,
-      crypto: 'ecc'
-    }
-    let response = await post(this.httpEndpoint + '/api/v1/addresses/new', params)
+    let response = await this._post('/api/v1/addresses/new', {
+      type: coinId
+    })
     return _.get(response, 'result.address')
   }
 
   /**
    * 验证地址有效性
-   * @param coinType：地址币种类型
-   * @param address：地址
+   * @param coinId 地址币种类型
+   * @param address 地址
    * @returns Boolean
    */
-  async verifyAddress (coinType, address) {
-    if (_.isNil(coinType) || _.isNil(address) || typeof coinType !== 'string' || typeof address !== 'string') {
+  async verifyAddress (coinId, address) {
+    if (!(_.isString(coinId) && _.isString(address))) {
       throw new Error('missing required parameter or parameter type mismatch...')
     }
-    const obj = {
-      type: coinType
-    }
-    const sig = crypto.ecc.sign(obj, this.eccKey, {})
-    let params = {
-      timestamp: sig.timestamp,
-      data: obj,
-      sig: sig.signature,
-      appid: this.appId,
-      crypto: 'ecc'
-    }
-    let response = await post(this.httpEndpoint + `/api/v1/addresses/${address}/verify`, params)
+    let response = await this._post(`/api/v1/addresses/${address}/verify`, {
+      type: coinId
+    })
     return _.get(response, 'result.valid')
   }
 
   /**
    * 发起审计
-   * @param coinType：审计币种类型
-   * @param auditTime：审计时间
-   * @returns Object: 瑶池生成的审计订单
+   * @param coinId 审计币种类型
+   * @param auditTime 审计时间
+   * @returns Object 瑶池生成的审计订单
    */
-  async audit (coinType, auditTime) {
-    if (_.isNil(coinType) || _.isNil(auditTime) || typeof coinType !== 'string' || typeof auditTime !== 'number') {
+  async audit (coinId, auditTime) {
+    if (!(_.isString(coinId) && _.isNumber(auditTime))) {
       throw new Error('missing required parameter or parameter type mismatch...')
     }
-    const obj = {
-      type: coinType,
+    let response = await this._post('/api/v1/audits', {
+      type: coinId,
       audittime: auditTime
-    }
-    const sig = crypto.ecc.sign(obj, this.eccKey, {})
-    let params = {
-      timestamp: sig.timestamp,
-      data: obj,
-      sig: sig.signature,
-      appid: this.appId,
-      crypto: 'ecc'
-    }
-    let response = await post(this.httpEndpoint + '/api/v1/audits', params)
+    })
     return response.result
   }
 
@@ -166,11 +117,10 @@ class Api {
    * @returns Object: 订单详情
    */
   async getOrder (orderId) {
-    if (_.isNil(orderId) || typeof orderId !== 'string') {
+    if (!(_.isString(orderId) || _.isNumber(orderId))) {
       throw new Error('missing required parameter or parameter type mismatch...')
     }
-    const sig = crypto.ecc.sign({}, this.eccKey, {})
-    let response = await get(this.httpEndpoint + `/api/v1/transactions/${orderId}?crypto=ecc&appid=${this.appId}&timestamp=${sig.timestamp}&sig=${encodeURIComponent(sig.signature)}`)
+    let response = await this._get(`/api/v1/transactions/${orderId}`)
     return response.result
   }
 
@@ -180,11 +130,10 @@ class Api {
    * @returns Object: 审计订单详情
    */
   async getAudit (auditId) {
-    if (_.isNil(auditId) || typeof auditId !== 'string') {
+    if (!_.isString(auditId)) {
       throw new Error('missing required parameter or parameter type mismatch...')
     }
-    const sig = crypto.ecc.sign({}, this.eccKey, {})
-    let response = await get(this.httpEndpoint + `/api/v1/audits/${auditId}?crypto=ecc&appid=${this.appId}&timestamp=${sig.timestamp}&sig=${encodeURIComponent(sig.signature)}`)
+    let response = await this._get(`/api/v1/audits/${auditId}`)
     return response.result
   }
 
@@ -193,61 +142,75 @@ class Api {
    * @param coinType：币种
    * @returns {Object: {balance: 总余额, balanceAvailable: 可用余额, balanceUnavailable: 不可用余额}}
    */
-  async getBalance (coinType) {
-    if (_.isNil(coinType) || typeof coinType !== 'string') {
+  async getBalance (coinId) {
+    if (!_.isString(coinId)) {
       throw new Error('missing required parameter or parameter type mismatch...')
     }
-    const sig = crypto.ecc.sign({}, this.eccKey, {})
-    let response = await get(this.httpEndpoint + `/api/v1/wallet/${coinType}/status?crypto=ecc&appid=${this.appId}&timestamp=${sig.timestamp}&sig=${encodeURIComponent(sig.signature)}`)
+    let response = await this._get(`/api/v1/wallet/${coinId}/status`)
     let result = response.result
     return {
-      'balance': result.balance,
-      'balanceAvailable': result.balanceAvailable,
-      'balanceUnavailable': result.balanceUnavailable
+      balance: result.balance,
+      balanceAvailable: result.balanceAvailable,
+      balanceUnavailable: result.balanceUnavailable
     }
   }
 
   /**
    * 授权币种
-   * @param {string} coinId 币种唯一代号，避免重名
-   * @param {string} coinType 代币类型
-   * @param {string} chain 链名
-   * @param {string} token 代币名
-   * @param {number} decimal 精度
-   * @param {string} [contract=undefined] 智能合约地址
    * @returns {string} authToken
    */
   async authCoin (coinId, coinType, chain, token, decimal, contract = undefined) {
     if (_.isNil(this.authKey)) {
       throw new Error('missing auth key, unable to authorize coin...')
     } else {
-      let obj = {
+      await this._patch(`/api/v1/wallet/${coinId}/token`, {
         authToken: authBuilder.buildCoin(this.authKey, { coinId, coinType, chain, token, contract, decimal })
-      }
-      const sig = crypto.ecc.sign(obj, this.eccKey, {})
-      let params = {
-        timestamp: sig.timestamp,
-        data: obj,
-        sig: sig.signature,
-        appid: this.appId,
-        crypto: 'ecc'
-      }
-      let response = await patch(this.httpEndpoint + `/api/v1/wallet/${coinId}/token`, params)
-      return _.get(response, 'result.jadepool')
+      })
+      return true
     }
   }
-}
 
-const post = async (url, data) => {
-  return (await axios.post(url, data)).data
-}
-
-const get = async (url) => {
-  return (await axios.get(url)).data
-}
-
-const patch = async (url, data) => {
-  return (await axios.patch(url, data)).data
+  // 内部Http调用的方法
+  async _request (url, method, data) {
+    // 构建签名
+    data = data || {}
+    const sig = crypto.ecc.sign(data, this.eccKey, { accept: 'string' })
+    let params = {
+      data: data,
+      appid: this.appId,
+      timestamp: sig.timestamp,
+      sig: encodeURIComponent(sig.signature)
+    }
+    // 发送请求
+    let res
+    let error
+    try {
+      let axiosParams = { baseURL: this.httpEndpoint, url, method }
+      if (method === 'get') {
+        axiosParams.params = params
+      } else {
+        axiosParams.data = params
+      }
+      res = (await axios(axiosParams)).data
+    } catch (err) {
+      if (err.response) {
+        res = err.response.data
+      } else {
+        error = err.message
+      }
+    }
+    const resultCode = res.code || res.status || 0
+    if (!error && resultCode !== 0) {
+      error = `code=${resultCode},msg=${res.message},result=${JSON.stringify(res.result)}`
+    }
+    if (error) {
+      throw new Error(error)
+    }
+    return res
+  }
+  async _get (url, data) { return this._request(url, 'get', data) }
+  async _post (url, data) { return this._request(url, 'post', data) }
+  async _patch (url, data) { return this._request(url, 'patch', data) }
 }
 
 Api.default = Api

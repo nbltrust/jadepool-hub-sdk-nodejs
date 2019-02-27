@@ -1,8 +1,15 @@
 {
   "name": "@jadepool/sdk",
-  "version": "0.12.7",
+  "version": "1.0.0",
   "description": "Jadepool nodejs SDK",
   "main": "src/index.js",
+  "bin": {
+    "jpcli": "./bin/cli.js"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
   "scripts": {
     "test": "mocha test/**/*.test.js"
   },
@@ -17,7 +24,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@jadepool/crypto": "^0.1.1",
+    "@jadepool/crypto": "^0.1.2",
+    "argparse": "^1.0.10",
     "axios": "^0.18.0",
     "is-base64": "^0.1.0",
     "is-hex": "^1.1.3",
