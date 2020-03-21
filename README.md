@@ -18,10 +18,13 @@ bin/cli -h
 bin/cli.js keypairs
 
 # create new address
-bin/cli.js address-new coinId
+bin/cli.js address-new {coinId}
 
 # withdraw
-bin/cli.js withdraw coinId to value sequence [-m MEMO] [-d EXTRADATA]
+bin/cli.js withdraw {coinId} {to} {value} {sequence} [-m MEMO] [-d EXTRADATA]
+
+# audit
+bin/cli.js audit {coinId} {auditTime}
 ```
 
 ## Example
