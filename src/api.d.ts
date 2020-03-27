@@ -7,10 +7,6 @@ interface ApiConfig {
   eccKey: string;
   /** the encoder of Jadepool communication ECC private key */
   eccKeyEncoder: 'hex' | 'base64';
-  /** Optional, Jadepool HSM signer auth ECC private key 为密码机验签的交易签名私钥 */
-  authKey?: string;
-  /** Optional, the encoder of Jadepool HSM signer auth ECC private key */
-  authKeyEncoder?: 'hex' | 'base64';
 }
 
 /** 提现参数 */

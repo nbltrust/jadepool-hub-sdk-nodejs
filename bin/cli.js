@@ -104,26 +104,6 @@ apiParser.setDefaults({
   func: args => invokeMethod(args, 'getBalance', [args.coinId])
 })
 
-// ----- 保存hsm授权 -------
-// auth-coin
-apiParser = subParsers.addParser('auth-coin', { help: 'call Jadepool API: authCoin' })
-apiParser.addArgument('coinId')
-apiParser.addArgument('coinType')
-apiParser.addArgument('chain')
-apiParser.addArgument(['-t', '--token'])
-apiParser.addArgument(['-d', '--decimal'], { type: 'int' })
-apiParser.addArgument(['-c', '--contract'])
-apiParser.setDefaults({
-  func: args => invokeMethod(args, 'authCoin', [
-    args.coinId,
-    args.coinType,
-    args.chain,
-    args.token || args.coinId,
-    args.decimal || 8,
-    args.contract || null
-  ])
-})
-
 // 执行
 async function main () {
   const args = parser.parseArgs()

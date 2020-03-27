@@ -1,8 +1,6 @@
 {
   "eccKey": "7uK2lwGDIwopJdaduVr4maw1sPyjDB4J386gnQ01KXc=",
   "eccKeyEncoder": "base64",
-  "authKey": "rXCSc0HDzNTHReUdsMAM4j7cZnz8cemQpYTp6VHDkpc=",
-  "authKeyEncoder": "base64",
   "httpEndpoint": "http://127.0.0.1:7001",
   "appId": "test"
 }
