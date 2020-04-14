@@ -26,8 +26,7 @@ module.exports = function (opts) {
       valid = false
     } else {
       try {
-        let objToVerify = Object.assign({ timestamp: jpData.timestamp }, jpData.result)
-        valid = ecc.verify(objToVerify, jpData.sig, pubKey)
+        valid = ecc.verify(jpData.result, { timestamp: jpData.timestamp, signature: jpData.sig }, pubKey)
       } catch (err) {
         valid = false
       }

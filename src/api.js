@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const axios = require('axios').default
-const crypto = require('@jadepool/crypto')
+const { ecc } = require('@jadepool/crypto')
 const isHex = require('is-hex')
 const isBase64 = require('is-base64')
 const authBuilder = require('./authBuilder')
@@ -159,7 +159,7 @@ class Api {
   async _request (url, method, data) {
     // 构建签名
     data = data || {}
-    const sig = crypto.ecc.sign(data, this.eccKey, { accept: 'string' })
+    const sig = ecc.sign(data, this.eccKey, { accept: 'string' })
     let params = {
       data: data,
       appid: this.appId,
