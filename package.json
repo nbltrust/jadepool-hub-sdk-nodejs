@@ -24,7 +24,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@jadepool/crypto": "^2.0.4",
+    "@jadepool/crypto": "^2.2.0",
     "argparse": "^1.0.10",
     "axios": "^0.19.2",
     "is-base64": "^0.1.0",
