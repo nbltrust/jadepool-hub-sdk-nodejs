@@ -72,7 +72,7 @@ class Api {
     if (!_.isNil(this.authKey)) {
       obj.auth = authBuilder.buildWithdraw(this.authKey, { sequence, coinId, value, to, memo })
     }
-    let response = await this._post(`/api/v2/s/wallets/${wallet}/tokens/${coinId}/withdraw?appid=sudo`ß, obj)
+    let response = await this._post(`/api/v2/s/wallets/${wallet}/tokens/${coinId}/withdraw`, obj)
     return response.result
   }
 
