@@ -1,6 +1,6 @@
 {
-  "eccKey": "7uK2lwGDIwopJdaduVr4maw1sPyjDB4J386gnQ01KXc=",
+  "eccKey": "U+p3+nLISklsIbGBtSvUTOhunj40R/jyTvYfF7l+IIE=",
   "eccKeyEncoder": "base64",
-  "httpEndpoint": "http://127.0.0.1:7001",
-  "appId": "test"
+  "httpEndpoint": "http://10.225.91.20:7001",
+  "appId": "sudo"
 }
