@@ -63,15 +63,28 @@ class Api {
     return response.result
   }
 
+  async sWithdraw ({ wallet, coinId, value, to, sequence, memo, extraData }) {
+    let obj = { value, to }
+    if (_.isNumber(sequence)) obj.sequence = sequence
+    if (_.isString(memo)) obj.memo = memo
+    if (_.isString(extraData)) obj.extraData = extraData
+    // HSM mode required
+    if (!_.isNil(this.authKey)) {
+      obj.auth = authBuilder.buildWithdraw(this.authKey, { sequence, coinId, value, to, memo })
+    }
+    let response = await this._post(`/api/v2/s/wallets/${wallet}/tokens/${coinId}/withdraw?appid=sudo`ß, obj)
+    return response.result
+  }
+
   /**
    * 生成新充值地址
    */
-  async newAddress (coinId) {
+  async newAddress (coinId, mode) {
     if (!_.isString(coinId)) {
       throw new Error('missing required parameter or parameter type mismatch...')
     }
-    let response = await this._post('/api/v1/addresses/new', {
-      type: coinId
+    let response = await this._post(`/api/v2/address/${coinId}/new`, {
+      mode
     })
     return _.get(response, 'result.address')
   }
@@ -137,8 +150,19 @@ class Api {
     return {
       balance: result.balance,
       balanceAvailable: result.balanceAvailable,
-      balanceUnavailable: result.balanceUnavailable
+      balanceUnavailable: result.balanceUnavailable,
+      balancePending: result.balancePending
     }
+  }
+
+  async sNewAddress (coinId, mode, walletID) {
+    if (!_.isString(coinId)) {
+      throw new Error('missing required parameter or parameter type mismatch...')
+    }
+    let response = await this._post(`/api/v2/s/wallets/${walletID}/address/${coinId}/new`, {
+      mode
+    })
+    return _.get(response, 'result.address')
   }
 
   /**
@@ -153,6 +177,63 @@ class Api {
       })
       return true
     }
+  }
+
+  async register (coinId, wallet, investorID, sequence) {
+    if (!_.isString(coinId)) {
+      throw new Error('missing required parameter or parameter type mismatch...')
+    }
+    let response = await this._post(`/api/v2/s/wallets/${wallet}/ds/${coinId}/register`, {
+      investorID,
+      sequence
+    })
+    let result = response.result
+    return result
+  }
+
+  async regInfo (coinId, wallet) {
+    if (!_.isString(coinId)) {
+      throw new Error('missing required parameter or parameter type mismatch...')
+    }
+    let response = await this._get(`/api/v2/s/wallets/${wallet}/ds/${coinId}/reg_info`)
+    let result = response.result
+    return result
+  }
+
+  async transferCheck (coinId, wallet, to, value) {
+    if (!_.isString(coinId)) {
+      throw new Error('missing required parameter or parameter type mismatch...')
+    }
+    let response = await this._post(`/api/v2/s/wallets/${wallet}/ds/${coinId}/transfer_check`, {
+      to,
+      value
+    })
+    let result = response.result
+    return result
+  }
+
+  async addAddress (coinId, wallet, address, sequence) {
+    if (!_.isString(coinId)) {
+      throw new Error('missing required parameter or parameter type mismatch...')
+    }
+    let response = await this._post(`/api/v2/s/wallets/${wallet}/ds/${coinId}/add_address`, {
+      address,
+      sequence
+    })
+    let result = response.result
+    return result
+  }
+
+  async removeAddress (coinId, wallet, address, sequence) {
+    if (!_.isString(coinId)) {
+      throw new Error('missing required parameter or parameter type mismatch...')
+    }
+    let response = await this._post(`/api/v2/s/wallets/${wallet}/ds/${coinId}/remove_address`, {
+      address,
+      sequence
+    })
+    let result = response.result
+    return result
   }
 
   // 内部Http调用的方法

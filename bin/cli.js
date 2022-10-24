@@ -20,9 +20,10 @@ let kpParser = subParsers.addParser('keypairs', {
   addHelp: true,
   help: 'create ecc key pairs'
 })
+kpParser.addArgument('encode')
 kpParser.setDefaults({
   func: args => {
-    const kp = crypto.ecc.generateKeyPair()
+    const kp = crypto.ecc.generateKeyPair(args.encode)
     console.dir(kp, { depth: 1 })
   }
 })
@@ -50,8 +51,17 @@ let apiParser
 // address-new
 apiParser = subParsers.addParser('address-new', { help: 'call Jadepool API: newAddress' })
 apiParser.addArgument('coinId')
+apiParser.addArgument('mode')
 apiParser.setDefaults({
-  func: args => invokeMethod(args, 'newAddress', [args.coinId])
+  func: args => invokeMethod(args, 'newAddress', [args.coinId, args.mode])
+})
+
+apiParser = subParsers.addParser('s-address-new', { help: 'call Jadepool API: newAddress' })
+apiParser.addArgument('coinId')
+apiParser.addArgument('mode')
+apiParser.addArgument('walletID')
+apiParser.setDefaults({
+  func: args => invokeMethod(args, 'sNewAddress', [args.coinId, args.mode, args.walletID])
 })
 
 // address-verify
@@ -72,6 +82,19 @@ apiParser.addArgument(['-m', '--memo'], { type: 'string' })
 apiParser.addArgument(['-d', '--extraData'], { type: 'string' })
 apiParser.setDefaults({
   func: args => invokeMethod(args, 'withdraw', [args])
+})
+
+// sWithdraw
+apiParser = subParsers.addParser('s-withdraw', { help: 'call Jadepool API: sudo withdraw' })
+apiParser.addArgument('wallet')
+apiParser.addArgument('coinId')
+apiParser.addArgument('to')
+apiParser.addArgument('value')
+apiParser.addArgument('sequence', { type: 'int' })
+apiParser.addArgument(['-m', '--memo'], { type: 'string' })
+apiParser.addArgument(['-d', '--extraData'], { type: 'string' })
+apiParser.setDefaults({
+  func: args => invokeMethod(args, 'sWithdraw', [args])
 })
 
 // audit-new
@@ -102,6 +125,54 @@ apiParser = subParsers.addParser('balance', { help: 'call Jadepool API: getBalan
 apiParser.addArgument('coinId')
 apiParser.setDefaults({
   func: args => invokeMethod(args, 'getBalance', [args.coinId])
+})
+
+// register
+apiParser = subParsers.addParser('register', { help: 'call Jadepool API: register' })
+apiParser.addArgument('coinId')
+apiParser.addArgument('wallet')
+apiParser.addArgument('investorID')
+apiParser.addArgument('sequence', { type: 'int' })
+apiParser.setDefaults({
+  func: args => invokeMethod(args, 'register', [args.coinId, args.wallet, args.investorID, args.sequence])
+})
+
+// reg_info
+apiParser = subParsers.addParser('reginfo', { help: 'call Jadepool API: reginfo' })
+apiParser.addArgument('coinId')
+apiParser.addArgument('wallet')
+apiParser.setDefaults({
+  func: args => invokeMethod(args, 'regInfo', [args.coinId, args.wallet])
+})
+
+// transfer_check
+apiParser = subParsers.addParser('dscheck', { help: 'call Jadepool API: dscheck' })
+apiParser.addArgument('coinId')
+apiParser.addArgument('wallet')
+apiParser.addArgument('to')
+apiParser.addArgument('value')
+apiParser.setDefaults({
+  func: args => invokeMethod(args, 'transferCheck', [args.coinId, args.wallet, args.to, args.value])
+})
+
+// add_address
+apiParser = subParsers.addParser('dsadd', { help: 'call Jadepool API: dsadd' })
+apiParser.addArgument('coinId')
+apiParser.addArgument('wallet')
+apiParser.addArgument('address')
+apiParser.addArgument('sequence', { type: 'int' })
+apiParser.setDefaults({
+  func: args => invokeMethod(args, 'addAddress', [args.coinId, args.wallet, args.address, args.sequence])
+})
+
+// remove_address
+apiParser = subParsers.addParser('dsremove', { help: 'call Jadepool API: dsadd' })
+apiParser.addArgument('coinId')
+apiParser.addArgument('wallet')
+apiParser.addArgument('address')
+apiParser.addArgument('sequence', { type: 'int' })
+apiParser.setDefaults({
+  func: args => invokeMethod(args, 'removeAddress', [args.coinId, args.wallet, args.address, args.sequence])
 })
 
 // 执行
