@@ -17,7 +17,10 @@ app.use(sdk.middleware({
 app.post('/callback', (req, res, next) => {
   console.log('Jadepool Message:', JSON.stringify(req.body))
   console.log('Is message valid?', req.msgValid)
-  res.status(200).send('')
+  res.status(200).json({
+    result: '0',
+    message: 'success'
+  })
 })
 
 // 监听
