@@ -116,6 +116,14 @@ class Api {
     return response.result
   }
 
+  async bizflowPass (wallet, orderId) {
+    let response = await this._patch(`/api/v2/s/wallets/${wallet}/orders/${orderId}/bizflow`, {
+      'passed': true
+    })
+    let result = response.result
+    return result
+  }
+
   /**
    * 查询瑶池订单详情
    */
@@ -265,6 +273,7 @@ class Api {
         error = err.message
       }
     }
+    console.log(res)
     const resultCode = res.code || res.status || 0
     if (!error && resultCode !== 0) {
       error = `code=${resultCode},msg=${res.message},result=${JSON.stringify(res.result)}`
