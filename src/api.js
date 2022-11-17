@@ -76,6 +76,16 @@ class Api {
     return response.result
   }
 
+  async sRefund ({ wallet, orderId, to, value }) {
+    if (!(_.isString(wallet) && _.isString(orderId) && _.isString(to))) {
+      throw new Error('missing required parameter or parameter type mismatch...')
+    }
+    let obj = { to, 'passed': false }
+    if (_.isString(value)) obj.value = value
+    let response = await this._post(`/api/v2/s/wallets/${wallet}/orders/${orderId}/refund`, obj)
+    return response.result
+  }
+
   /**
    * 生成新充值地址
    */

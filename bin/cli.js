@@ -64,12 +64,22 @@ apiParser.setDefaults({
   func: args => invokeMethod(args, 'sNewAddress', [args.coinId, args.mode, args.walletID])
 })
 
-apiParser = subParsers.addParser('s-bizflow-pass', { help: 'call Jadepool API: s-bizflow-pass' })
+apiParser = subParsers.addParser('s-bizflow-pass', { help: 'call Jadepool API: bizflowPass' })
 apiParser.addArgument('wallet')
 apiParser.addArgument('orderId')
 apiParser.setDefaults({
   func: args => invokeMethod(args, 'bizflowPass', [args.wallet, args.orderId])
 })
+
+apiParser = subParsers.addParser('s-refund', { help: 'call Jadepool API: sRefund' })
+apiParser.addArgument('wallet')
+apiParser.addArgument('orderId')
+apiParser.addArgument('to')
+apiParser.addArgument(['-v', '--value'], { type: 'string' })
+apiParser.setDefaults({
+  func: args => invokeMethod(args, 'sRefund', [args])
+})
+
 // address-verify
 apiParser = subParsers.addParser('address-verify', { help: 'call Jadepool API: verifyAddress' })
 apiParser.addArgument('coinId')
