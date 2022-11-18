@@ -134,6 +134,15 @@ class Api {
     return result
   }
 
+  async bizflowRefund (wallet, orderId, refundAddress) {
+    let response = await this._patch(`/api/v2/s/wallets/${wallet}/orders/${orderId}/bizflow`, {
+      'passed': false,
+      refundAddress
+    })
+    let result = response.result
+    return result
+  }
+
   /**
    * 查询瑶池订单详情
    */

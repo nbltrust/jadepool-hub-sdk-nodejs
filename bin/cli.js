@@ -71,6 +71,14 @@ apiParser.setDefaults({
   func: args => invokeMethod(args, 'bizflowPass', [args.wallet, args.orderId])
 })
 
+apiParser = subParsers.addParser('s-bizflow-refund', { help: 'call Jadepool API: bizflowRefund' })
+apiParser.addArgument('wallet')
+apiParser.addArgument('orderId')
+apiParser.addArgument('refundAddress')
+apiParser.setDefaults({
+  func: args => invokeMethod(args, 'bizflowRefund', [args.wallet, args.orderId, args.refundAddress])
+})
+
 apiParser = subParsers.addParser('s-refund', { help: 'call Jadepool API: sRefund' })
 apiParser.addArgument('wallet')
 apiParser.addArgument('orderId')
