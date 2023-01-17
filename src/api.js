@@ -127,7 +127,7 @@ class Api {
   }
 
   async bizflowPass (wallet, orderId) {
-    let response = await this._patch(`/api/v2/s/wallets/${wallet}/orders/${orderId}/bizflow`, {
+    let response = await this._patch(`/api/v2/s/wallets/${wallet}/orders/${orderId}/aml`, {
       'passed': true
     })
     let result = response.result
@@ -135,7 +135,7 @@ class Api {
   }
 
   async bizflowRefund (wallet, orderId, refundAddress) {
-    let response = await this._patch(`/api/v2/s/wallets/${wallet}/orders/${orderId}/bizflow`, {
+    let response = await this._patch(`/api/v2/s/wallets/${wallet}/orders/${orderId}/aml`, {
       'passed': false,
       refundAddress
     })
