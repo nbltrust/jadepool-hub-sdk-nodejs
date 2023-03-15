@@ -63,11 +63,15 @@ class Api {
     return response.result
   }
 
-  async sWithdraw ({ wallet, coinId, value, to, sequence, memo, extraData }) {
+  async sWithdraw ({ wallet, coinId, value, to, sequence, maxFeePrice, bizOrderId, bizUserId, memo, extraData }) {
     let obj = { value, to }
     if (_.isNumber(sequence)) obj.sequence = sequence
     if (_.isString(memo)) obj.memo = memo
     if (_.isString(extraData)) obj.extraData = extraData
+    if (_.isNumber(maxFeePrice)) obj.maxFeePrice = maxFeePrice
+    if (_.isString(bizOrderId)) obj.bizOrderId = bizOrderId
+    if (_.isString(bizUserId)) obj.bizUserId = bizUserId
+
     // HSM mode required
     if (!_.isNil(this.authKey)) {
       obj.auth = authBuilder.buildWithdraw(this.authKey, { sequence, coinId, value, to, memo })

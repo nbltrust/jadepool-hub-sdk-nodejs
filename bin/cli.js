@@ -28,6 +28,20 @@ kpParser.setDefaults({
   }
 })
 
+kpParser = subParsers.addParser('pubkey', {
+  addHelp: true,
+  help: 'create ecc pubkey'
+})
+kpParser.addArgument('prikey')
+kpParser.addArgument('encode')
+kpParser.setDefaults({
+  func: args => {
+    const pubC = crypto.ecc.pubKeyCreate(args.prikey, args.encode, true).toString(args.encode)
+    const pub = crypto.ecc.pubKeyCreate(args.prikey, args.encode, false).toString(args.encode)
+    console.dir(pubC)
+    console.dir(pub)
+  }
+})
 // 使用API
 async function invokeMethod (args, methodName, methodArgs) {
   const cfgName = 'jpcli.config.json'
@@ -117,6 +131,9 @@ apiParser.addArgument('value')
 apiParser.addArgument('sequence', { type: 'int' })
 apiParser.addArgument(['-m', '--memo'], { type: 'string' })
 apiParser.addArgument(['-d', '--extraData'], { type: 'string' })
+apiParser.addArgument(['-p', '--maxFeePrice'], { type: 'int' })
+apiParser.addArgument(['-u', '--bizUserId'], { type: 'string' })
+apiParser.addArgument(['-o', '--bizOrderId'], { type: 'string' })
 apiParser.setDefaults({
   func: args => invokeMethod(args, 'sWithdraw', [args])
 })
